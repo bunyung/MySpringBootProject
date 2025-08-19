@@ -1,4 +1,4 @@
-package com.rookies3.myspringbootlab;
+package com.rookies3.MySpringbootLab;  // ✅ 대문자 맞춤
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
