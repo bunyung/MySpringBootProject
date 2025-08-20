@@ -1,9 +1,7 @@
 package com.rookies3.MySpringbootLab.controller;
 
-import com.rookies3.MySpringbootLab.entity.Book;
-import com.rookies3.MySpringbootLab.repository.BookRepository;
-import com.rookies3.MySpringbootLab.exception.BusinessException;
-import org.springframework.http.ResponseEntity;
+import com.rookies3.MySpringbootLab.dto.BookDTO.*;
+import com.rookies3.MySpringbootLab.service.BookService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,65 +10,39 @@ import java.util.List;
 @RequestMapping("/api/books")
 public class BookRestController {
 
-    private final BookRepository bookRepository;
+    private final BookService bookService;
 
-    public BookRestController(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
+    public BookRestController(BookService bookService) {
+        this.bookService = bookService;
     }
 
-    // 1. 새 도서 등록
     @PostMapping
-    public Book createBook(@RequestBody Book book) {
-        return bookRepository.save(book);
+    public BookResponse createBook(@RequestBody BookCreateRequest request) {
+        return bookService.createBook(request);
     }
 
-    // 2. 모든 도서 조회
     @GetMapping
-    public List<Book> getAllBooks() {
-        return bookRepository.findAll();
+    public List<BookResponse> getAllBooks() {
+        return bookService.getAllBooks();
     }
 
-    // 3. ID로 도서 조회
     @GetMapping("/{id}")
-    public ResponseEntity<Book> getBookById(@PathVariable Long id) {
-        return bookRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public BookResponse getBookById(@PathVariable Long id) {
+        return bookService.getBookById(id);
     }
 
-    // 4. ISBN으로 도서 조회
     @GetMapping("/isbn/{isbn}")
-    public Book getBookByIsbn(@PathVariable String isbn) {
-        return bookRepository.findByIsbn(isbn)
-                .orElseThrow(() -> new BusinessException("Book not found with ISBN: " + isbn));
+    public BookResponse getBookByIsbn(@PathVariable String isbn) {
+        return bookService.getBookByIsbn(isbn);
     }
 
-    // 5. 도서 정보 수정
     @PutMapping("/{id}")
-    public ResponseEntity<Book> updateBook(
-            @PathVariable Long id,
-            @RequestBody Book updatedBook
-    ) {
-        return bookRepository.findById(id)
-                .map(book -> {
-                    book.setTitle(updatedBook.getTitle());
-                    book.setAuthor(updatedBook.getAuthor());
-                    book.setIsbn(updatedBook.getIsbn());
-                    book.setPublishDate(updatedBook.getPublishDate());
-                    book.setPrice(updatedBook.getPrice());
-                    return ResponseEntity.ok(bookRepository.save(book));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public BookResponse updateBook(@PathVariable Long id, @RequestBody BookUpdateRequest request) {
+        return bookService.updateBook(id, request);
     }
 
-    // 6. 도서 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
-        return bookRepository.findById(id)
-                .map(book -> {
-                    bookRepository.delete(book);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public void deleteBook(@PathVariable Long id) {
+        bookService.deleteBook(id);
     }
 }
